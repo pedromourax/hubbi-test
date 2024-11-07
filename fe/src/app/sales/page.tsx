@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { SalesTable } from "@/components/sales/sales-table";
 import { Plus } from "lucide-react";
+import { SalesTable } from "./_components/salesTable";
+import { columns } from "./_components/columns";
+import { getSales } from "./actions";
 
-export default function SalesPage() {
+export default async function SalesPage() {
+  const sales = await getSales();
+
   return (
     <div className="space-y-6 px-24 max-lg:px-16 max-md:px-3">
       <div className="flex justify-between items-center">
@@ -24,7 +28,7 @@ export default function SalesPage() {
           </Button>
         </Link>
       </div>
-      <SalesTable />
+      <SalesTable columns={columns} data={sales} />
     </div>
   );
 }

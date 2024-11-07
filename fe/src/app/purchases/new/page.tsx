@@ -9,51 +9,57 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { ArrowLeft, Package2, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import useSWR from "swr";
+import { getSales } from "./actions";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 export default function NewPurchasePage() {
-  const [products, setProducts] = useState([
-    { id: 1, name: "", quantity: 1, price: 0 },
-  ]);
+  // BUSCAR SOMENTE AS SALES QUE ESTÃO 'PENDENTES'
+  const { data: sales, error } = useSWR("getSales", getSales);
+  const [selectedSale, setSelectedSale] = useState<any>();
+  const [selectedProducts, setSelectedProducts] = useState<string[]>();
+  const [productsList, setProductsList] = useState();
 
-  const addProduct = () => {
-    setProducts([
-      ...products,
-      {
-        id: products.length + 1,
-        name: "",
-        quantity: 1,
-        price: 0,
-      },
-    ]);
+  const formatProductsSelection = () => {
+    console.log(sales[selectedSale]?.items);
+    const a = sales[selectedSale]?.items.map((product: any) => {
+      return {
+        value: product.id,
+        label: `${product.quantity}x ${product.product.name} - $${product.price}`,
+        icon: Package2,
+      };
+    });
+    setProductsList(a);
   };
 
-  const removeProduct = (id: number) => {
-    return products.filter((product) => product.id !== id);
+  const onsubmit = () => {
+    selectedSale;
   };
 
   return (
-    <div className="px-24 max-lg:px-16 max-md:px-3">
-      <Link
-        href={"/purchases"}
-        className="absolute flex items-center gap-1 text-neutral-500"
-      >
-        <ArrowLeft size={16} />
-        Purchases
-      </Link>
-      <div className="max-w-2xl mx-auto">
+    <div className="px-24 w-full flex items-center justify-center flex-col max-lg:px-16 max-md:px-3">
+      <div className="w-full flex items-center justify-start max-md:mb-3">
+        <Link
+          href={"/purchases"}
+          className="w-fit flex items-center justify-center gap-1 text-neutral-500"
+        >
+          <ArrowLeft size={16} />
+          Purchases
+        </Link>
+      </div>
+      <div className="max-w-2xl min-w-80">
         <Card>
           <CardHeader>
             <CardTitle>New Purchase</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="space-y-6">
+            <form onSubmit={onsubmit} className="space-y-6">
               <div className="space-y-4">
                 <div>
                   <Label className="block text-sm font-medium mb-2">
@@ -61,32 +67,55 @@ export default function NewPurchasePage() {
                       Choose a Sale
                     </Label>
                   </Label>
-                  {/* <Input
-                    type="text"
-                    className="w-full p-2 border rounded-md"
-                    placeholder="Enter customer name"
-                  /> */}
-                  <Select>
+
+                  <Select
+                    onValueChange={(value) => {
+                      formatProductsSelection();
+                      return setSelectedSale(value);
+                    }}
+                  >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sales" />
+                      <SelectValue placeholder="Sales">
+                        {selectedSale && (
+                          <div>{`Sale ${sales[selectedSale]?.id}`}</div>
+                        )}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="apple">Apple</SelectItem>
-                        <SelectItem value="banana">Banana</SelectItem>
-                        <SelectItem value="blueberry">Blueberry</SelectItem>
-                        <SelectItem value="grapes">Grapes</SelectItem>
-                        <SelectItem value="pineapple">Pineapple</SelectItem>
+                        {sales ? (
+                          sales.map((sale: any, index: any) => (
+                            <SelectItem key={sale.id} value={index}>
+                              {`Sale id: ${sale.id} - $${sale.totalAmount}`}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value={"none"}>Loading...</SelectItem>
+                        )}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <Label className="block text-sm font-medium mb-2">
-                    Products
-                  </Label>
-                  {products.map((product) => (
+                  {productsList && (
+                    <div>
+                      <Label className="block text-sm font-medium mb-2">
+                        Products
+                      </Label>
+
+                      <MultiSelect
+                        options={productsList}
+                        onValueChange={setSelectedProducts}
+                        placeholder="Select Products"
+                        variant="inverted"
+                        animation={2}
+                        maxCount={3}
+                      />
+                    </div>
+                  )}
+
+                  {/* {products.map((product) => (
                     <div
                       key={product.id}
                       className="flex gap-2 mb-4 w-full items-center"
@@ -120,8 +149,8 @@ export default function NewPurchasePage() {
                         <Trash2 size={16} />
                       </button>
                     </div>
-                  ))}
-                  <Button
+                  ))} */}
+                  {/* <Button
                     type="button"
                     variant="outline"
                     onClick={addProduct}
@@ -129,17 +158,19 @@ export default function NewPurchasePage() {
                   >
                     <Plus size={16} />
                     Add Product
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
 
               <Button
                 type="submit"
-                variant="ringHover"
-                className="w-full gap-1"
+                variant="expandIcon"
+                Icon={ShoppingCart}
+                iconPlacement="right"
+                iconSize={16}
+                className="w-full"
               >
-                Create Sale
-                <ShoppingCart size={16} />
+                Create Purchase
               </Button>
             </form>
           </CardContent>

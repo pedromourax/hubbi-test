@@ -21,7 +21,7 @@ export function Navbar() {
             <Link href={"/"} className="flex-shrink-0 flex items-center">
               {/* <LayoutDashboard className="h-8 w-8 text-indigo-600" /> */}
               <img src="/f1-car.png" className="h-16 w-16" />
-              <span className="ml-2 text-xl font-bold text-gray-900">
+              <span className="ml-2 max-md:hidden text-xl font-bold text-gray-900">
                 Sales Manager
               </span>
             </Link>
@@ -29,7 +29,7 @@ export function Navbar() {
               <Link
                 href={"/sales"}
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  pathname === "/sales"
+                  pathname.includes("/sales")
                     ? "border-indigo-500 text-gray-900"
                     : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
                 }`}
@@ -40,7 +40,7 @@ export function Navbar() {
               <Link
                 href={"/purchases"}
                 className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  pathname === "/purchases"
+                  pathname.includes("/purchases")
                     ? "border-indigo-500 text-gray-900"
                     : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
                 }`}

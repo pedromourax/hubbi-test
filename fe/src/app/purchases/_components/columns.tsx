@@ -60,13 +60,13 @@ export const columns: ColumnDef<any>[] = [
       let badgeColor = "";
 
       switch (status) {
-        case "Pending":
+        case "PENDING":
           badgeColor = "bg-yellow-100";
           break;
-        case "Completed":
+        case "COMPLETED":
           badgeColor = "bg-green-100";
           break;
-        case "Cancelled":
+        case "CANCELLED":
           badgeColor = "bg-red-100";
           break;
         default:
