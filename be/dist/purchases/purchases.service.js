@@ -29,11 +29,11 @@ let PurchasesService = class PurchasesService {
         try {
             const sale = await this.salesService.findOne(createPurchase.sale);
             if (!sale) {
-                throw new common_1.BadRequestException('Venda não encontrada');
+                throw new common_1.BadRequestException('Sale not found');
             }
             const selectedProducts = sale.products.filter((product) => createPurchase.products.some((p) => p.id === product.id));
             if (selectedProducts.length === 0) {
-                throw new common_1.BadRequestException('Nenhum produto válido selecionado');
+                throw new common_1.BadRequestException('No valid products selected');
             }
             const totalAmount = selectedProducts.reduce((acc, product) => acc + Number(product.price) * product.quantity, 0);
             const purchase = this.purchaseRepository.create({
@@ -49,7 +49,7 @@ let PurchasesService = class PurchasesService {
             return savedPurchase;
         }
         catch (error) {
-            throw new common_1.BadRequestException(error.message || 'Erro ao criar a compra');
+            throw new common_1.BadRequestException(error.message || 'Error creating purchase');
         }
     }
     async findAll() {
@@ -60,12 +60,12 @@ let PurchasesService = class PurchasesService {
                 },
             });
             if (!purchase) {
-                throw new common_1.NotFoundException('Compra não encontrada');
+                throw new common_1.NotFoundException('Purchase not found');
             }
             return purchase;
         }
         catch (error) {
-            throw new common_1.BadRequestException(error.message || 'Erro ao buscar a compra');
+            throw new common_1.BadRequestException(error.message || 'Error fetching purchase');
         }
     }
     async findOne(id) {
@@ -77,12 +77,12 @@ let PurchasesService = class PurchasesService {
                 },
             });
             if (!purchase) {
-                throw new common_1.NotFoundException('Compra não encontrada');
+                throw new common_1.NotFoundException('Purchase not found');
             }
             return purchase;
         }
         catch (error) {
-            throw new common_1.BadRequestException(error.message || 'Erro ao buscar a compra');
+            throw new common_1.BadRequestException(error.message || 'Error fetching purchase');
         }
     }
     async delete(id) {
@@ -93,10 +93,10 @@ let PurchasesService = class PurchasesService {
                 return this.productsService.update(product.id, product);
             }));
             await this.purchaseRepository.remove(purchase);
-            return { message: 'Compra removida com sucesso' };
+            return { message: 'Purchase removed successfully' };
         }
         catch (error) {
-            throw new common_1.BadRequestException(error.message || 'Erro ao remover a compra');
+            throw new common_1.BadRequestException(error.message || 'Error removing purchase');
         }
     }
     async deleteMany(ids) {
@@ -107,10 +107,10 @@ let PurchasesService = class PurchasesService {
                 return this.productsService.update(product.id, product);
             })));
             await this.purchaseRepository.remove(purchases);
-            return { message: 'Compras removidas com sucesso' };
+            return { message: 'Purchases removed successfully' };
         }
         catch (error) {
-            throw new common_1.BadRequestException(error.message || 'Erro ao remover as compras');
+            throw new common_1.BadRequestException(error.message || 'Error removing purchases');
         }
     }
     async getTotalAmountSum() {
@@ -120,7 +120,7 @@ let PurchasesService = class PurchasesService {
             return totalSum;
         }
         catch (error) {
-            throw new common_1.BadRequestException(error.message || 'Erro ao calcular o total das compras');
+            throw new common_1.BadRequestException(error.message || 'Error calculating total purchases');
         }
     }
 };

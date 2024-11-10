@@ -1,3 +1,4 @@
+"use server";
 import { API_URL } from "@/shared/config";
 import { IDashboard } from "@/shared/types/dashboard.interface";
 

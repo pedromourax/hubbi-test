@@ -1,5 +1,4 @@
 "use server";
-import { IProduct } from "@/app/sales/new/actions";
 import { API_URL } from "@/shared/config";
 import { revalidateTag } from "next/cache";
 

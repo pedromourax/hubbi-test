@@ -76,7 +76,7 @@ let ProductsService = ProductsService_1 = class ProductsService {
         try {
             const product = await this.productRepository.findOneBy({ id });
             if (!product) {
-                throw new common_1.NotFoundException('Produto não encontrado');
+                throw new common_1.NotFoundException('Product not found');
             }
             const updatedProduct = await this.productRepository.save({
                 ...product,
