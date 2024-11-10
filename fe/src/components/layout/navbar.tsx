@@ -3,15 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Package, ShoppingCart } from "lucide-react";
+import Image from "next/image";
 
 export function Navbar() {
   const pathname = usePathname();
-
-  const links = [
-    { href: "/", label: "Dashboard" },
-    { href: "/sales", label: "Sales" },
-    { href: "/purchases", label: "Purchases" },
-  ];
 
   return (
     <nav className="bg-white border-b border-gray-200">
@@ -19,8 +14,7 @@ export function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link href={"/"} className="flex-shrink-0 flex items-center">
-              {/* <LayoutDashboard className="h-8 w-8 text-indigo-600" /> */}
-              <img src="/f1-car.png" className="h-16 w-16" />
+              <Image width={64} height={64} alt="logo" src="/f1-car.png" />
               <span className="ml-2 max-md:hidden text-xl font-bold text-gray-900">
                 Sales Manager
               </span>

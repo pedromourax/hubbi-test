@@ -1,13 +1,19 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PurchaseEntity } from './entities/purchase.entity';
 import { PurchasesService } from './purchases.service';
 import { PurchasesController } from './purchases.controller';
-import { PrismaService } from '../prisma.service';
-import { SalesModule } from '../sales/sales.module';
 import { ProductsModule } from '../products/products.module';
+import { SalesModule } from '../sales/sales.module';
 
 @Module({
-  imports: [SalesModule, ProductsModule],
+  imports: [
+    TypeOrmModule.forFeature([PurchaseEntity]),
+    ProductsModule,
+    forwardRef(() => SalesModule),
+  ],
   controllers: [PurchasesController],
-  providers: [PurchasesService, PrismaService],
+  providers: [PurchasesService],
+  exports: [PurchasesService],
 })
 export class PurchasesModule {}

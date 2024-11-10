@@ -9,49 +9,35 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateSaleDto = exports.CreateSaleItemDto = void 0;
+exports.CreateSaleDto = void 0;
 const class_validator_1 = require("class-validator");
-const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
-class CreateSaleItemDto {
-}
-exports.CreateSaleItemDto = CreateSaleItemDto;
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateSaleItemDto.prototype, "name", void 0);
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(1),
-    __metadata("design:type", Number)
-], CreateSaleItemDto.prototype, "quantity", void 0);
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, swagger_1.ApiProperty)(),
-    (0, class_validator_1.Min)(0),
-    __metadata("design:type", Number)
-], CreateSaleItemDto.prototype, "price", void 0);
+const sale_entity_1 = require("../entities/sale.entity");
 class CreateSaleDto {
 }
 exports.CreateSaleDto = CreateSaleDto;
 __decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateSaleDto.prototype, "customerName", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(sale_entity_1.SaleStatus),
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CreateSaleDto.prototype, "status", void 0);
+__decorate([
     (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    (0, class_transformer_1.Type)(() => CreateSaleItemDto),
-    (0, swagger_1.ApiProperty)({
-        example: [
-            {
-                name: 'Molas Eibach',
-                quantity: 10,
-                price: 299,
-            },
-        ],
-    }),
+    (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Array)
-], CreateSaleDto.prototype, "items", void 0);
+], CreateSaleDto.prototype, "products", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({
+        example: '2024-10-21',
+    }),
+    __metadata("design:type", String)
+], CreateSaleDto.prototype, "date", void 0);
 //# sourceMappingURL=create-sale.dto.js.map

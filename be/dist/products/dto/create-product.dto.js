@@ -28,4 +28,10 @@ __decorate([
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateProductDto.prototype, "price", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Number)
+], CreateProductDto.prototype, "quantity", void 0);
 //# sourceMappingURL=create-product.dto.js.map

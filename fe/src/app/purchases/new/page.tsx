@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -16,30 +15,71 @@ import { ArrowLeft, Package2, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import useSWR from "swr";
-import { getSales } from "./actions";
+import { createPurchase, getSales, IPurchase } from "./actions";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { toast } from "sonner";
+
+export const dynamic = "force-dynamic";
 
 export default function NewPurchasePage() {
-  // BUSCAR SOMENTE AS SALES QUE ESTÃO 'PENDENTES'
   const { data: sales, error } = useSWR("getSales", getSales);
   const [selectedSale, setSelectedSale] = useState<any>();
   const [selectedProducts, setSelectedProducts] = useState<string[]>();
   const [productsList, setProductsList] = useState();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const formatProductsSelection = () => {
-    console.log(sales[selectedSale]?.items);
-    const a = sales[selectedSale]?.items.map((product: any) => {
-      return {
-        value: product.id,
-        label: `${product.quantity}x ${product.product.name} - $${product.price}`,
-        icon: Package2,
-      };
-    });
-    setProductsList(a);
+    const sale = sales[selectedSale];
+
+    const purchasedProductIds = new Set(
+      (sale?.purchases || []).reduce((acc: number[], purchase: any) => {
+        if (purchase?.products && Array.isArray(purchase.products)) {
+          return [
+            ...acc,
+            ...purchase.products.map((product: any) => product.id),
+          ];
+        }
+        return acc;
+      }, [])
+    );
+    const availableProducts = sale?.products
+      .filter((product: any) => !purchasedProductIds.has(product.id))
+      .map((product: any) => {
+        return {
+          value: product.id,
+          label: `${product.quantity}x ${product.name} - $${product.price}`,
+          icon: Package2,
+        };
+      });
+
+    setProductsList(availableProducts);
   };
 
-  const onsubmit = () => {
-    selectedSale;
+  const onsubmit = async () => {
+    setIsLoading(true);
+    try {
+      const saleId = sales[selectedSale]?.id;
+
+      if (!saleId || !selectedSale || !selectedProducts)
+        throw new Error("Please fill in the data correctly");
+
+      const purchase: IPurchase = {
+        sale: saleId,
+        products: selectedProducts.map((id: string) => {
+          return { id: +id };
+        }),
+      };
+
+      await createPurchase(purchase);
+      setIsLoading(false);
+      toast.success("Purchase created successfully");
+      setSelectedSale(undefined);
+      setSelectedProducts(undefined);
+      setProductsList(undefined);
+    } catch (error: any) {
+      setIsLoading(false);
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -53,13 +93,19 @@ export default function NewPurchasePage() {
           Purchases
         </Link>
       </div>
-      <div className="max-w-2xl min-w-80">
+      <div className="w-80">
         <Card>
           <CardHeader>
             <CardTitle>New Purchase</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={onsubmit} className="space-y-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                onsubmit();
+              }}
+              className="space-y-6"
+            >
               <div className="space-y-4">
                 <div>
                   <Label className="block text-sm font-medium mb-2">
@@ -77,7 +123,7 @@ export default function NewPurchasePage() {
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Sales">
                         {selectedSale && (
-                          <div>{`Sale ${sales[selectedSale]?.id}`}</div>
+                          <div>{`#${sales[selectedSale]?.id} - ${sales[selectedSale]?.customerName} $${sales[selectedSale]?.totalAmount}`}</div>
                         )}
                       </SelectValue>
                     </SelectTrigger>
@@ -86,7 +132,7 @@ export default function NewPurchasePage() {
                         {sales ? (
                           sales.map((sale: any, index: any) => (
                             <SelectItem key={sale.id} value={index}>
-                              {`Sale id: ${sale.id} - $${sale.totalAmount}`}
+                              {`#${sale.id} - ${sale.customerName} $${sale.totalAmount}`}
                             </SelectItem>
                           ))
                         ) : (
@@ -111,54 +157,10 @@ export default function NewPurchasePage() {
                         variant="inverted"
                         animation={2}
                         maxCount={3}
+                        className="text-wrap"
                       />
                     </div>
                   )}
-
-                  {/* {products.map((product) => (
-                    <div
-                      key={product.id}
-                      className="flex gap-2 mb-4 w-full items-center"
-                    >
-                      <Input
-                        type="text"
-                        placeholder="Product name"
-                        className="p-2 border rounded-md w-[31%]"
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Quantity"
-                        min="1"
-                        className="p-2 border rounded-md w-[31%]"
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Price"
-                        min="0"
-                        step="0.01"
-                        className="p-2 border rounded-md w-[31%]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const prod = removeProduct(product.id);
-                          setProducts(prod);
-                        }}
-                        className="w-[7%] rounded-full bg-red-50 hover:bg-red-100 cursor-pointer p-2 flex items-center justify-center"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  ))} */}
-                  {/* <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addProduct}
-                    className="mt-2 gap-2"
-                  >
-                    <Plus size={16} />
-                    Add Product
-                  </Button> */}
                 </div>
               </div>
 
@@ -169,8 +171,13 @@ export default function NewPurchasePage() {
                 iconPlacement="right"
                 iconSize={16}
                 className="w-full"
+                disabled={isLoading}
               >
-                Create Purchase
+                {isLoading ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-neutral-200 border-t-neutral-800" />
+                ) : (
+                  "Create Purchase"
+                )}
               </Button>
             </form>
           </CardContent>

@@ -1,107 +1,27 @@
 import { SalesService } from './sales.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
+import { SaleEntity } from './entities/sale.entity';
 export declare class SalesController {
     private readonly salesService;
     constructor(salesService: SalesService);
+    private logger;
     create(createSaleDto: CreateSaleDto): Promise<{
-        items: ({
-            product: {
-                id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                price: number;
-                name: string;
-            };
-        } & {
-            id: number;
-            quantity: number;
-            price: number;
-            productId: number;
-            saleId: number;
-        })[];
-    } & {
-        id: number;
+        customerName: string;
+        status: import("./entities/sale.entity").SaleStatus;
+        date: string;
         totalAmount: number;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
+    } & SaleEntity>;
+    findAll(): Promise<SaleEntity[]>;
+    findLastThree(): Promise<{
+        lastThree: SaleEntity[];
+        sales: number;
+        purchases: number;
     }>;
-    findAll(): Promise<({
-        items: ({
-            product: {
-                id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                price: number;
-                name: string;
-            };
-        } & {
-            id: number;
-            quantity: number;
-            price: number;
-            productId: number;
-            saleId: number;
-        })[];
-        purchases: {
-            id: number;
-            totalAmount: number;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            saleId: number;
-        }[];
-    } & {
-        id: number;
-        totalAmount: number;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-    })[]>;
-    findOne(id: string): Promise<{
-        items: ({
-            product: {
-                id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                price: number;
-                name: string;
-            };
-        } & {
-            id: number;
-            quantity: number;
-            price: number;
-            productId: number;
-            saleId: number;
-        })[];
-        purchases: ({
-            items: ({
-                product: {
-                    id: number;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    price: number;
-                    name: string;
-                };
-            } & {
-                id: number;
-                quantity: number;
-                price: number;
-                productId: number;
-                purchaseId: number;
-            })[];
-        } & {
-            id: number;
-            totalAmount: number;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            saleId: number;
-        })[];
-    } & {
-        id: number;
-        totalAmount: number;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
+    findOne(id: string): Promise<SaleEntity>;
+    updateStatus(id: string, payload: {
+        status: SaleEntity['status'];
+    }): Promise<SaleEntity>;
+    delete(id: string): Promise<{
+        message: string;
     }>;
 }

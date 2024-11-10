@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreatePurchaseDto = exports.CreatePurchaseItemDto = void 0;
 const class_validator_1 = require("class-validator");
-const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
 class CreatePurchaseItemDto {
 }
@@ -42,22 +41,11 @@ exports.CreatePurchaseDto = CreatePurchaseDto;
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsNumber)(),
-    (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Number)
-], CreatePurchaseDto.prototype, "saleId", void 0);
+], CreatePurchaseDto.prototype, "sale", void 0);
 __decorate([
     (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    (0, class_transformer_1.Type)(() => CreatePurchaseItemDto),
-    (0, swagger_1.ApiProperty)({
-        example: [
-            {
-                productId: 1001,
-                quantity: 10,
-                price: 299,
-            },
-        ],
-    }),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Array)
-], CreatePurchaseDto.prototype, "items", void 0);
+], CreatePurchaseDto.prototype, "products", void 0);
 //# sourceMappingURL=create-purchase.dto.js.map

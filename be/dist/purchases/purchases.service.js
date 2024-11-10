@@ -8,82 +8,129 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PurchasesService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma.service");
+const typeorm_1 = require("@nestjs/typeorm");
+const purchase_entity_1 = require("./entities/purchase.entity");
+const typeorm_2 = require("typeorm");
+const products_service_1 = require("../products/products.service");
 const sales_service_1 = require("../sales/sales.service");
 let PurchasesService = class PurchasesService {
-    constructor(prisma, salesService) {
-        this.prisma = prisma;
+    constructor(purchaseRepository, salesService, productsService) {
+        this.purchaseRepository = purchaseRepository;
         this.salesService = salesService;
+        this.productsService = productsService;
     }
-    async create(createPurchaseDto) {
-        const sale = await this.salesService.findOne(createPurchaseDto.saleId);
-        if (!sale) {
-            throw new common_1.BadRequestException('Sale not found');
-        }
-        const totalAmount = createPurchaseDto.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        return this.prisma.purchase.create({
-            data: {
+    async create(createPurchase) {
+        try {
+            const sale = await this.salesService.findOne(createPurchase.sale);
+            if (!sale) {
+                throw new common_1.BadRequestException('Venda não encontrada');
+            }
+            const selectedProducts = sale.products.filter((product) => createPurchase.products.some((p) => p.id === product.id));
+            if (selectedProducts.length === 0) {
+                throw new common_1.BadRequestException('Nenhum produto válido selecionado');
+            }
+            const totalAmount = selectedProducts.reduce((acc, product) => acc + Number(product.price) * product.quantity, 0);
+            const purchase = this.purchaseRepository.create({
+                sale: sale.id,
+                products: selectedProducts,
                 totalAmount,
-                sale: { connect: { id: createPurchaseDto.saleId } },
-                items: {
-                    create: createPurchaseDto.items.map((item) => ({
-                        quantity: item.quantity,
-                        price: item.price,
-                        product: { connect: { id: item.productId } },
-                    })),
-                },
-            },
-            include: {
-                items: {
-                    include: {
-                        product: true,
-                    },
-                },
-                sale: true,
-            },
-        });
+            });
+            const savedPurchase = await this.purchaseRepository.save(purchase);
+            await Promise.all(selectedProducts.map(async (product) => {
+                product.purchase = savedPurchase;
+                return this.productsService.update(product.id, product);
+            }));
+            return savedPurchase;
+        }
+        catch (error) {
+            throw new common_1.BadRequestException(error.message || 'Erro ao criar a compra');
+        }
     }
     async findAll() {
-        return this.prisma.purchase.findMany({
-            include: {
-                items: {
-                    include: {
-                        product: true,
-                    },
+        try {
+            const purchase = await this.purchaseRepository.find({
+                relations: {
+                    products: true,
                 },
-                sale: true,
-            },
-        });
+            });
+            if (!purchase) {
+                throw new common_1.NotFoundException('Compra não encontrada');
+            }
+            return purchase;
+        }
+        catch (error) {
+            throw new common_1.BadRequestException(error.message || 'Erro ao buscar a compra');
+        }
     }
     async findOne(id) {
-        return this.prisma.purchase.findUnique({
-            where: { id },
-            include: {
-                items: {
-                    include: {
-                        product: true,
-                    },
+        try {
+            const purchase = await this.purchaseRepository.findOne({
+                where: { id },
+                relations: {
+                    products: true,
                 },
-                sale: {
-                    include: {
-                        items: {
-                            include: {
-                                product: true,
-                            },
-                        },
-                    },
-                },
-            },
-        });
+            });
+            if (!purchase) {
+                throw new common_1.NotFoundException('Compra não encontrada');
+            }
+            return purchase;
+        }
+        catch (error) {
+            throw new common_1.BadRequestException(error.message || 'Erro ao buscar a compra');
+        }
+    }
+    async delete(id) {
+        try {
+            const purchase = await this.findOne(id);
+            await Promise.all(purchase.products.map(async (product) => {
+                product.purchase = null;
+                return this.productsService.update(product.id, product);
+            }));
+            await this.purchaseRepository.remove(purchase);
+            return { message: 'Compra removida com sucesso' };
+        }
+        catch (error) {
+            throw new common_1.BadRequestException(error.message || 'Erro ao remover a compra');
+        }
+    }
+    async deleteMany(ids) {
+        try {
+            const purchases = await Promise.all(ids.map((id) => this.findOne(id)));
+            await Promise.all(purchases.flatMap((purchase) => purchase.products.map(async (product) => {
+                product.purchase = null;
+                return this.productsService.update(product.id, product);
+            })));
+            await this.purchaseRepository.remove(purchases);
+            return { message: 'Compras removidas com sucesso' };
+        }
+        catch (error) {
+            throw new common_1.BadRequestException(error.message || 'Erro ao remover as compras');
+        }
+    }
+    async getTotalAmountSum() {
+        try {
+            const purchases = await this.purchaseRepository.find();
+            const totalSum = purchases.reduce((acc, purchase) => acc + Number(purchase.totalAmount), 0);
+            return totalSum;
+        }
+        catch (error) {
+            throw new common_1.BadRequestException(error.message || 'Erro ao calcular o total das compras');
+        }
     }
 };
 exports.PurchasesService = PurchasesService;
 exports.PurchasesService = PurchasesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        sales_service_1.SalesService])
+    __param(0, (0, typeorm_1.InjectRepository)(purchase_entity_1.PurchaseEntity)),
+    __param(1, (0, common_1.Inject)((0, common_1.forwardRef)(() => sales_service_1.SalesService))),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        sales_service_1.SalesService,
+        products_service_1.ProductsService])
 ], PurchasesService);
 //# sourceMappingURL=purchases.service.js.map

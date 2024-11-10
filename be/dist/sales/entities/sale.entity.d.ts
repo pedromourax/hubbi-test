@@ -1,22 +1,13 @@
-import { Purchase } from 'src/purchases/entities/purchase.entity';
-import { Product } from '../../products/entities/product.entity';
-export declare class SaleItem {
+import { ProductEntity } from 'src/products/entities/product.entity';
+import { PurchaseEntity } from 'src/purchases/entities/purchase.entity';
+export declare class SaleEntity {
     id: number;
-    quantity: number;
-    price: number;
-    saleId: number;
-    sale?: Sale;
-    productId: number;
-    product?: Product;
-}
-export declare class Sale {
-    id: number;
+    customerName: string;
     totalAmount: number;
+    date: Date;
     status: SaleStatus;
-    createdAt: Date;
-    updatedAt: Date;
-    items?: SaleItem[];
-    purchases?: Purchase[];
+    products: ProductEntity[];
+    purchases: PurchaseEntity[];
 }
 export declare enum SaleStatus {
     PENDING = "PENDING",

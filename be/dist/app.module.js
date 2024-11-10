@@ -14,6 +14,7 @@ const products_module_1 = require("./products/products.module");
 const sales_module_1 = require("./sales/sales.module");
 const purchases_module_1 = require("./purchases/purchases.module");
 const config_1 = require("@nestjs/config");
+const typeorm_1 = require("@nestjs/typeorm");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -24,6 +25,17 @@ exports.AppModule = AppModule = __decorate([
             products_module_1.ProductsModule,
             sales_module_1.SalesModule,
             purchases_module_1.PurchasesModule,
+            typeorm_1.TypeOrmModule.forRoot({
+                type: 'postgres',
+                host: process.env.DB_HOST,
+                port: +process.env.DB_PORT,
+                username: process.env.DB_USERNAME,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_DATABASE,
+                synchronize: true,
+                logging: true,
+                entities: ['dist/**/**/*.entity{.ts,.js}'],
+            }),
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

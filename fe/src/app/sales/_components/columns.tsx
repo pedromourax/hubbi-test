@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,52 +6,48 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import {
-  ArrowUpDown,
-  ArrowUpRight,
+  Ban,
+  BookmarkCheck,
+  CircleDashed,
+  Clock,
   EllipsisVertical,
-  Pencil,
+  PackageSearch,
   Trash2,
 } from "lucide-react";
-import { format } from "date-fns";
-// import { toast } from "sonner";
 import Link from "next/link";
+import { deleteSale, updateStatus } from "../actions";
+import { toast } from "sonner";
+import { formatCurrency } from "@/shared/functions";
 
 export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "id",
     header: "Sale ID",
+    cell: ({ row }) => {
+      return `#${row.getValue("id")}`;
+    },
+  },
+  {
+    accessorKey: "customerName",
+    header: "Customer Name",
+    cell: ({ row }) => {
+      const name: string = row.getValue("customerName");
+      return <p className="text-sm font-medium leading-none">{name}</p>;
+    },
   },
   {
     accessorKey: "totalAmount",
     header: "Total Amount",
     cell: ({ row }) => {
       const totalAmountValue: number = row.getValue("totalAmount");
-      return <div>{`$ ${totalAmountValue.toFixed(2)}`}</div>;
-    },
-  },
-  {
-    accessorKey: "createdAt",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Date
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const dateValue: string = row.getValue("createdAt");
-      const formattedDate = dateValue
-        ? format(new Date(dateValue), "dd/MM/yyyy")
-        : "Data inválida";
-      return <div>{formattedDate}</div>;
+      return <div>{`${formatCurrency(totalAmountValue)}`}</div>;
     },
   },
   {
@@ -86,19 +81,18 @@ export const columns: ColumnDef<any>[] = [
     },
   },
   {
-    accessorKey: "items",
+    accessorKey: "products",
     header: "Items",
-    cell: () => {
-      return <div> Item </div>;
+    cell: ({ row }) => {
+      const items: any = row.getValue("products");
+      return <div> {items?.length} </div>;
     },
   },
-
   {
-    accessorKey: "purchaseId",
-    header: "Opções",
+    accessorKey: "id",
+    header: "Actions",
     cell: ({ row }) => {
-      const post = row.original;
-
+      const id: any = row.getValue("id");
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -107,39 +101,78 @@ export const columns: ColumnDef<any>[] = [
               <EllipsisVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Opções</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(post.id)}
-            >
-              <Link
-                className="gap-1 flex items-center justify-start"
-                href={`edit/${post.id}`}
-              >
-                <Pencil size={14} />
-                Editar Post
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => {}}>
-              <Link
-                className="gap-1 flex items-center justify-start"
-                href={`/posts/${post.slug}`}
-              >
-                <ArrowUpRight size={14} />
-                Ir para página
-              </Link>
-            </DropdownMenuItem>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Options</DropdownMenuLabel>
             <DropdownMenuSeparator />
 
+            <DropdownMenuItem>
+              <Link
+                className="gap-1 flex items-center justify-start"
+                href={`/sales/${id}`}
+              >
+                <PackageSearch size={14} />
+                View Details
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Clock size={14} />
+                Status
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await updateStatus(id, "PENDING")
+                      .then(() => {
+                        toast.success("Status set to pending successfully");
+                      })
+                      .catch((e: any) => toast.error(e));
+                  }}
+                >
+                  <CircleDashed size={14} />
+                  <span>Pending</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await updateStatus(id, "CANCELLED")
+                      .then(() => {
+                        toast.success("Status set to cancelled successfully");
+                      })
+                      .catch((e: any) => toast.error(e));
+                  }}
+                >
+                  <Ban size={14} />
+                  <span>Cancelled</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await updateStatus(id, "COMPLETED")
+                      .then(() => {
+                        toast.success("Status set to completed successfully");
+                      })
+                      .catch((e: any) => toast.error(e));
+                  }}
+                >
+                  <BookmarkCheck size={14} />
+                  <span>Completed</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel> Actions </DropdownMenuLabel>
             <DropdownMenuItem
-              className="flex items-center gap-2"
-              onClick={() => {
-                console.log("tes");
+              onClick={async () => {
+                await deleteSale(id)
+                  .then(() => {
+                    toast.success("Deleted successfully");
+                  })
+                  .catch((e: any) => toast.error(e));
               }}
             >
               <Trash2 size={14} />
-              Deletar
+              <span>Delete</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

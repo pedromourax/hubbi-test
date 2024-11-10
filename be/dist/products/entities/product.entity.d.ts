@@ -1,11 +1,10 @@
-import { Purchase } from 'src/purchases/entities/purchase.entity';
-import { Sale } from 'src/sales/entities/sale.entity';
-export declare class Product {
-    id: number;
+import { PurchaseEntity } from 'src/purchases/entities/purchase.entity';
+import { SaleEntity } from 'src/sales/entities/sale.entity';
+export declare class ProductEntity {
+    id?: number;
     name: string;
     price: number;
-    createdAt: Date;
-    updatedAt: Date;
-    sales?: Sale[];
-    purchases?: Purchase[];
+    quantity: number;
+    sale: SaleEntity;
+    purchase: PurchaseEntity;
 }

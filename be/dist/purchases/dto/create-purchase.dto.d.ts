@@ -4,6 +4,8 @@ export declare class CreatePurchaseItemDto {
     price: number;
 }
 export declare class CreatePurchaseDto {
-    saleId: number;
-    items: CreatePurchaseItemDto[];
+    sale: number;
+    products: {
+        id: number;
+    }[];
 }

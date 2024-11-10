@@ -11,14 +11,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var PurchasesController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PurchasesController = void 0;
 const common_1 = require("@nestjs/common");
 const purchases_service_1 = require("./purchases.service");
 const create_purchase_dto_1 = require("./dto/create-purchase.dto");
-let PurchasesController = class PurchasesController {
+let PurchasesController = PurchasesController_1 = class PurchasesController {
     constructor(purchasesService) {
         this.purchasesService = purchasesService;
+        this.logger = new common_1.Logger(PurchasesController_1.name);
     }
     create(createPurchaseDto) {
         return this.purchasesService.create(createPurchaseDto);
@@ -28,6 +30,15 @@ let PurchasesController = class PurchasesController {
     }
     findOne(id) {
         return this.purchasesService.findOne(+id);
+    }
+    async delete(id) {
+        try {
+            return await this.purchasesService.delete(+id);
+        }
+        catch (error) {
+            this.logger.error(error.message);
+            throw error;
+        }
     }
 };
 exports.PurchasesController = PurchasesController;
@@ -51,7 +62,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], PurchasesController.prototype, "findOne", null);
-exports.PurchasesController = PurchasesController = __decorate([
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], PurchasesController.prototype, "delete", null);
+exports.PurchasesController = PurchasesController = PurchasesController_1 = __decorate([
     (0, common_1.Controller)('api/v1/purchases'),
     __metadata("design:paramtypes", [purchases_service_1.PurchasesService])
 ], PurchasesController);

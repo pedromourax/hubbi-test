@@ -1,49 +1,32 @@
 import {
   IsArray,
   IsNotEmpty,
-  ValidateNested,
-  IsNumber,
-  Min,
   IsString,
+  IsEnum,
+  IsDateString,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-
-export class CreateSaleItemDto {
-  // @IsNotEmpty()
-  // @IsNumber()
-  // @ApiProperty()
-  // productId: number;
-  @IsNotEmpty()
-  @ApiProperty()
-  @IsString()
-  name: string;
-
-  @IsNotEmpty()
-  @ApiProperty()
-  @IsNumber()
-  @Min(1)
-  quantity: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  @ApiProperty()
-  @Min(0)
-  price: number;
-}
+import { SaleStatus } from '../entities/sale.entity';
+import { CreateProductDto } from 'src/products/dto/create-product.dto';
 
 export class CreateSaleDto {
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty()
+  customerName: string;
+
+  @IsEnum(SaleStatus)
+  @ApiProperty()
+  status?: SaleStatus;
+
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateSaleItemDto)
+  @ApiProperty()
+  products: CreateProductDto[];
+
+  @IsDateString()
+  @IsNotEmpty()
   @ApiProperty({
-    example: [
-      {
-        name: 'Molas Eibach',
-        quantity: 10,
-        price: 299,
-      },
-    ],
+    example: '2024-10-21',
   })
-  items: CreateSaleItemDto[];
+  date: string;
 }

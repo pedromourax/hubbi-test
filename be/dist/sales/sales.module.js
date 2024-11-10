@@ -8,18 +8,24 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SalesModule = void 0;
 const common_1 = require("@nestjs/common");
+const typeorm_1 = require("@nestjs/typeorm");
+const sale_entity_1 = require("./entities/sale.entity");
 const sales_service_1 = require("./sales.service");
 const sales_controller_1 = require("./sales.controller");
-const prisma_service_1 = require("../prisma.service");
 const products_module_1 = require("../products/products.module");
+const purchases_module_1 = require("../purchases/purchases.module");
 let SalesModule = class SalesModule {
 };
 exports.SalesModule = SalesModule;
 exports.SalesModule = SalesModule = __decorate([
     (0, common_1.Module)({
-        imports: [products_module_1.ProductsModule],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([sale_entity_1.SaleEntity]),
+            products_module_1.ProductsModule,
+            (0, common_1.forwardRef)(() => purchases_module_1.PurchasesModule),
+        ],
         controllers: [sales_controller_1.SalesController],
-        providers: [sales_service_1.SalesService, prisma_service_1.PrismaService],
+        providers: [sales_service_1.SalesService],
         exports: [sales_service_1.SalesService],
     })
 ], SalesModule);

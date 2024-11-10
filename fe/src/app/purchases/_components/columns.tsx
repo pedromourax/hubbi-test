@@ -11,87 +11,56 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ColumnDef } from "@tanstack/react-table";
 import {
-  ArrowDownUp,
-  ArrowUpDown,
   ArrowUpRight,
   EllipsisVertical,
+  Package2,
   Pencil,
   Trash2,
 } from "lucide-react";
-// import { toast } from "sonner";
 import Link from "next/link";
+import { deletePurchase } from "../actions";
+import { toast } from "sonner";
 
 export const columns: ColumnDef<any>[] = [
   {
-    accessorKey: "purchaseId",
-    header: "Purchase ID",
-  },
-  {
-    accessorKey: "relatedSale",
-    header: "Related Sale",
-  },
-  {
-    accessorKey: "date",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Date
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    // cell: ({ row }) => {
-    //   const dateValue: { seconds: number; nanoseconds: number } =
-    //     row.getValue("date");
-    //   const formattedDate = dateValue
-    //     ? new Date(dateValue.seconds * 1000).toLocaleDateString("pt-BR")
-    //     : "Data inválida";
-    //   return <div>{formattedDate}</div>;
-    // },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "id",
+    header: "ID",
     cell: ({ row }) => {
-      const status: any = row.getValue("status");
-      let badgeColor = "";
-
-      switch (status) {
-        case "PENDING":
-          badgeColor = "bg-yellow-100";
-          break;
-        case "COMPLETED":
-          badgeColor = "bg-green-100";
-          break;
-        case "CANCELLED":
-          badgeColor = "bg-red-100";
-          break;
-        default:
-          badgeColor = "bg-gray-100";
-      }
-
+      return `#${row.getValue("id")}`;
+    },
+  },
+  {
+    accessorKey: "totalAmount",
+    header: "Total Amount",
+    cell: ({ row }) => {
+      const amount = parseFloat(row.getValue("totalAmount"));
+      const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        }).format(value);
+      };
+      return <div>{`${formatCurrency(amount)}`}</div>;
+    },
+  },
+  {
+    accessorKey: "products",
+    header: "Products",
+    cell: ({ row }) => {
+      const products: any[] = row.getValue("products");
       return (
-        <span
-          className={`inline-flex items-center px-3 py-2 rounded-full text-xs font-semibold ${badgeColor}`}
-        >
-          {status}
-        </span>
+        <div className="text-sm flex items-center gap-1">
+          <Package2 size={14} /> {products.length}{" "}
+          {products.length === 1 ? "item" : "items"}
+        </div>
       );
     },
   },
   {
-    accessorKey: "amount",
-    header: "Amount",
-  },
-
-  {
-    accessorKey: "purchaseId",
+    accessorKey: "id",
     header: "Opções",
     cell: ({ row }) => {
-      const post = row.original;
+      const purchase = row.original;
 
       return (
         <DropdownMenu>
@@ -102,38 +71,28 @@ export const columns: ColumnDef<any>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Opções</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(post.id)}
-            >
-              <Link
-                className="gap-1 flex items-center justify-start"
-                href={`edit/${post.id}`}
-              >
-                <Pencil size={14} />
-                Editar Post
-              </Link>
-            </DropdownMenuItem>
+            <DropdownMenuLabel>Options</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => {}}>
               <Link
                 className="gap-1 flex items-center justify-start"
-                href={`/posts/${post.slug}`}
+                href={`/purchases/${purchase.id}`}
               >
                 <ArrowUpRight size={14} />
-                Ir para página
+                View details
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-
             <DropdownMenuItem
               className="flex items-center gap-2"
-              onClick={() => {
-                console.log("tes");
+              onClick={async () => {
+                await deletePurchase(purchase.id)
+                  .then(() => toast.success("Deleted successfully"))
+                  .catch((e: any) => toast.error(e));
               }}
             >
               <Trash2 size={14} />
-              Deletar
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

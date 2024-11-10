@@ -1,117 +1,21 @@
-import { PrismaService } from '../prisma.service';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
-import { SalesService } from '../sales/sales.service';
+import { PurchaseEntity } from './entities/purchase.entity';
+import { Repository } from 'typeorm';
+import { ProductsService } from 'src/products/products.service';
+import { SalesService } from 'src/sales/sales.service';
 export declare class PurchasesService {
-    private prisma;
+    private readonly purchaseRepository;
     private salesService;
-    constructor(prisma: PrismaService, salesService: SalesService);
-    create(createPurchaseDto: CreatePurchaseDto): Promise<{
-        items: ({
-            product: {
-                id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                price: number;
-                name: string;
-            };
-        } & {
-            id: number;
-            quantity: number;
-            price: number;
-            productId: number;
-            purchaseId: number;
-        })[];
-        sale: {
-            id: number;
-            totalAmount: number;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-        };
-    } & {
-        id: number;
-        totalAmount: number;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        saleId: number;
+    private productsService;
+    constructor(purchaseRepository: Repository<PurchaseEntity>, salesService: SalesService, productsService: ProductsService);
+    create(createPurchase: CreatePurchaseDto): Promise<PurchaseEntity>;
+    findAll(): Promise<PurchaseEntity[]>;
+    findOne(id: number): Promise<PurchaseEntity>;
+    delete(id: number): Promise<{
+        message: string;
     }>;
-    findAll(): Promise<({
-        items: ({
-            product: {
-                id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                price: number;
-                name: string;
-            };
-        } & {
-            id: number;
-            quantity: number;
-            price: number;
-            productId: number;
-            purchaseId: number;
-        })[];
-        sale: {
-            id: number;
-            totalAmount: number;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-        };
-    } & {
-        id: number;
-        totalAmount: number;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        saleId: number;
-    })[]>;
-    findOne(id: number): Promise<{
-        items: ({
-            product: {
-                id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                price: number;
-                name: string;
-            };
-        } & {
-            id: number;
-            quantity: number;
-            price: number;
-            productId: number;
-            purchaseId: number;
-        })[];
-        sale: {
-            items: ({
-                product: {
-                    id: number;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    price: number;
-                    name: string;
-                };
-            } & {
-                id: number;
-                quantity: number;
-                price: number;
-                productId: number;
-                saleId: number;
-            })[];
-        } & {
-            id: number;
-            totalAmount: number;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-        };
-    } & {
-        id: number;
-        totalAmount: number;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        saleId: number;
+    deleteMany(ids: number[]): Promise<{
+        message: string;
     }>;
+    getTotalAmountSum(): Promise<number>;
 }

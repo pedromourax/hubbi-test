@@ -1,107 +1,29 @@
-import { PrismaService } from '../prisma.service';
 import { CreateSaleDto } from './dto/create-sale.dto';
+import { SaleEntity } from './entities/sale.entity';
+import { Repository } from 'typeorm';
+import { ProductsService } from 'src/products/products.service';
+import { PurchasesService } from 'src/purchases/purchases.service';
 export declare class SalesService {
-    private prisma;
-    constructor(prisma: PrismaService);
-    create(createSaleDto: CreateSaleDto): Promise<{
-        items: ({
-            product: {
-                id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                price: number;
-                name: string;
-            };
-        } & {
-            id: number;
-            quantity: number;
-            price: number;
-            productId: number;
-            saleId: number;
-        })[];
-    } & {
-        id: number;
+    private readonly saleRepository;
+    private productsService;
+    private purchasesService;
+    constructor(saleRepository: Repository<SaleEntity>, productsService: ProductsService, purchasesService: PurchasesService);
+    private logger;
+    create(createSale: CreateSaleDto): Promise<{
+        customerName: string;
+        status: import("./entities/sale.entity").SaleStatus;
+        date: string;
         totalAmount: number;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
+    } & SaleEntity>;
+    findAll(): Promise<SaleEntity[]>;
+    findOne(id: number): Promise<SaleEntity>;
+    updateStatus(id: number, status: SaleEntity['status']): Promise<SaleEntity>;
+    delete(id: number): Promise<{
+        message: string;
     }>;
-    findAll(): Promise<({
-        items: ({
-            product: {
-                id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                price: number;
-                name: string;
-            };
-        } & {
-            id: number;
-            quantity: number;
-            price: number;
-            productId: number;
-            saleId: number;
-        })[];
-        purchases: {
-            id: number;
-            totalAmount: number;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            saleId: number;
-        }[];
-    } & {
-        id: number;
-        totalAmount: number;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-    })[]>;
-    findOne(id: number): Promise<{
-        items: ({
-            product: {
-                id: number;
-                createdAt: Date;
-                updatedAt: Date;
-                price: number;
-                name: string;
-            };
-        } & {
-            id: number;
-            quantity: number;
-            price: number;
-            productId: number;
-            saleId: number;
-        })[];
-        purchases: ({
-            items: ({
-                product: {
-                    id: number;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    price: number;
-                    name: string;
-                };
-            } & {
-                id: number;
-                quantity: number;
-                price: number;
-                productId: number;
-                purchaseId: number;
-            })[];
-        } & {
-            id: number;
-            totalAmount: number;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            saleId: number;
-        })[];
-    } & {
-        id: number;
-        totalAmount: number;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
+    findLastThree(): Promise<SaleEntity[]>;
+    getTotalAmount(): Promise<{
+        sales: number;
+        purchases: number;
     }>;
 }

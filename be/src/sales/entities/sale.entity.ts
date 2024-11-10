@@ -1,24 +1,29 @@
-import { Purchase } from 'src/purchases/entities/purchase.entity';
-import { Product } from '../../products/entities/product.entity';
+import { ProductEntity } from 'src/products/entities/product.entity';
+import { PurchaseEntity } from 'src/purchases/entities/purchase.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-export class SaleItem {
+@Entity('sales')
+export class SaleEntity {
+  @PrimaryGeneratedColumn()
   id: number;
-  quantity: number;
-  price: number;
-  saleId: number;
-  sale?: Sale;
-  productId: number;
-  product?: Product;
-}
 
-export class Sale {
-  id: number;
+  @Column()
+  customerName: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalAmount: number;
+
+  @Column()
+  date: Date;
+
+  @Column({ default: 'PENDING' })
   status: SaleStatus;
-  createdAt: Date;
-  updatedAt: Date;
-  items?: SaleItem[];
-  purchases?: Purchase[];
+
+  @OneToMany(() => ProductEntity, (products) => products.sale)
+  products: ProductEntity[];
+
+  @OneToMany(() => PurchaseEntity, (purchase) => purchase.sale)
+  purchases: PurchaseEntity[];
 }
 
 export enum SaleStatus {

@@ -12,4 +12,9 @@ export class CreateProductDto {
   @ApiProperty()
   @Min(0)
   price: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @ApiProperty()
+  quantity: number;
 }

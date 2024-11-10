@@ -1,12 +1,6 @@
-import {
-  IsArray,
-  IsNotEmpty,
-  ValidateNested,
-  IsNumber,
-  Min,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsArray, IsNotEmpty, IsNumber, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { CreateProductDto } from 'src/products/dto/create-product.dto';
 
 export class CreatePurchaseItemDto {
   @IsNotEmpty()
@@ -30,20 +24,11 @@ export class CreatePurchaseItemDto {
 export class CreatePurchaseDto {
   @IsNotEmpty()
   @IsNumber()
-  @ApiProperty()
-  saleId: number;
+  sale: number;
 
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreatePurchaseItemDto)
-  @ApiProperty({
-    example: [
-      {
-        productId: 1001,
-        quantity: 10,
-        price: 299,
-      },
-    ],
-  })
-  items: CreatePurchaseItemDto[];
+  @IsNotEmpty()
+  products: {
+    id: number;
+  }[];
 }
